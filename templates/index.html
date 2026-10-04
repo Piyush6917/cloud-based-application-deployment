@@ -1,0 +1,94 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Deployment Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="navbar">
+        <div class="brand"><span class="brand-icon">☁</span> CloudDeploy</div>
+        <span class="status"><span class="dot"></span> Application Online</span>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <p class="eyebrow">CLOUD APPLICATION PLATFORM</p>
+            <h1>Manage your cloud records.</h1>
+            <p class="subtitle">A simple application to manage records, with a foundation ready for AWS deployment.</p>
+        </section>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="alert {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <section class="panel">
+            <h2>Create a record</h2>
+            <form action="{{ url_for('add_record') }}" method="POST">
+                <label for="title">Title</label>
+                <input id="title" name="title" type="text" maxlength="120"
+                       placeholder="e.g. AWS deployment setup" required>
+
+                <label for="description">Description</label>
+                <textarea id="description" name="description" maxlength="500"
+                          rows="4" placeholder="Add some details..."></textarea>
+
+                <button type="submit">+ Add record</button>
+            </form>
+        </section>
+
+        
+<section class="upload-section">
+    <h2>Upload a file to AWS S3</h2>
+    <form action="{{ url_for('upload_file') }}"
+          method="POST"
+          enctype="multipart/form-data">
+        <input type="file" name="file"
+               accept=".pdf,.png,.jpg,.jpeg,.txt,.csv"
+               required>
+        <button type="submit">Upload to S3</button>
+    </form>
+    <p>Allowed: PDF, PNG, JPG, TXT, CSV. Maximum size: 10 MB.</p>
+</section>
+
+
+        <section class="records-section">
+            <div class="section-heading">
+                <h2>Your records</h2>
+                <span class="count">{{ records|length }} total</span>
+            </div>
+
+            {% if records %}
+                <div class="records">
+                    {% for record in records %}
+                        <article class="record">
+                            <div class="record-content">
+                                <h3>{{ record.title }}</h3>
+                                <p>{{ record.description or "No description provided." }}</p>
+                                <small>Created: {{ record.created_at.strftime('%d %b %Y, %H:%M') if record.created_at else "Just now" }}</small>
+                            </div>
+                            <form action="{{ url_for('delete_record', record_id=record.id) }}"
+                                  method="POST">
+                                <button class="delete-button" type="submit"
+                                        aria-label="Delete {{ record.title }}">Delete</button>
+                            </form>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">▤</div>
+                    <h3>No records yet</h3>
+                    <p>Create your first record using the form above.</p>
+                </div>
+            {% endif %}
+        </section>
+    </main>
+
+    <footer>CloudDeploy · Built with Flask, ready for AWS</footer>
+</body>
+</html>
